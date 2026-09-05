@@ -57,7 +57,16 @@ class PHIGuard:
 class AuditTrail:
     """Cryptographic Tamper-Evident HMAC-SHA256 Audit Trail."""
     def __init__(self, secret_key: Optional[str] = None):
-        self.secret_key = (secret_key or os.getenv("AUDIT_SECRET_KEY", "microfluidic-droplet-generator-master-audit-key-2026")).encode("utf-8")
+        key = secret_key or os.getenv("AUDIT_SECRET_KEY")
+        if not key:
+            raise EnvironmentError(
+                "AUDIT_SECRET_KEY environment variable is required. "
+                "Set it before instantiating AuditTrail. "
+                "Example: export AUDIT_SECRET_KEY=$(python -c \"import secrets; print(secrets.token_hex(32))\")"
+            )
+        if len(key) < 16:
+            raise ValueError("AUDIT_SECRET_KEY must be at least 16 characters long for HMAC-SHA256 security.")
+        self.secret_key = key.encode("utf-8")
         self.logs: List[Dict[str, Any]] = []
 
     def log(self, actor: str, actor_tier: str, event_type: str, details: Dict[str, Any]) -> Dict[str, Any]:

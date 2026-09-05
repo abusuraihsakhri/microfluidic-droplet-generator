@@ -4,6 +4,7 @@ Domain: Microfluidics
 Standard: Microfluidic Drop-Seq Standards
 """
 import datetime
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Any
@@ -25,6 +26,12 @@ class FrontierPayload:
     is_critical_flag: bool = False
     attributes: Dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+
+    def __post_init__(self):
+        if math.isnan(self.primary_metric) or math.isinf(self.primary_metric):
+            raise ValueError("primary_metric must be a finite number (NaN/Infinity rejected)")
+        if math.isnan(self.secondary_metric) or math.isinf(self.secondary_metric):
+            raise ValueError("secondary_metric must be a finite number (NaN/Infinity rejected)")
 
 
 @dataclass

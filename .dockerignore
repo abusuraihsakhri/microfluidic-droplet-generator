@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+*.egg-info
+dist
+build
+
+# Virtual environments
+venv
+.venv
+env
+.env
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Local secrets
+.env
+.env.local
+.env.*.local
+
+# Test artifacts
+.pytest_cache
+htmlcov
+.coverage
+
+# Local data
+results.csv
+output.csv
+*.log
