@@ -15,7 +15,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Microfluidic Droplet Generator API",
-    description="Enterprise Distributed Component Platform (Clinical & Biomedical AI)",
+    description="Rule-based telemetry evaluator (demonstration, not validated)",
     version="3.0.0-ENTERPRISE",
 )
 
@@ -35,7 +35,7 @@ async def rejected_identifier(request: Request, exc: SecurityException):
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "microfluidic-droplet-generator", "domain": "Clinical & Biomedical AI", "standard": "CAP / CLSI / ISO Standards", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "microfluidic-droplet-generator", "domain": "Rule-based telemetry demonstration", "standard": "CAP / CLSI / ISO Standards", "version": "3.0.0-ENTERPRISE"}
 
 
 @app.get("/metrics", response_class=PlainTextResponse)
