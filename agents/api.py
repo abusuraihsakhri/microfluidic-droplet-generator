@@ -26,6 +26,7 @@ class ChatRequest(BaseModel):
 
 @app.exception_handler(SecurityException)
 async def rejected_identifier(request: Request, exc: SecurityException):
+    GLOBAL_METRICS.record_phi_block()
     return JSONResponse(
         status_code=422,
         content={"detail": "Sensitive identifier detected; use de-identified inputs."},
