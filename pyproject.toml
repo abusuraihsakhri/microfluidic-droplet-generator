@@ -28,3 +28,6 @@ microfluidic-droplet-generator = "droplet_microfluidics.cli:main"
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/microfluidic-droplet-generator"
 Repository = "https://github.com/abusuraihsakhri/microfluidic-droplet-generator.git"
+
+[tool.setuptools.packages.find]
+include = ["agents*", "droplet_microfluidics*"]
