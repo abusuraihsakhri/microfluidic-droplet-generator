@@ -1,236 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microfluidic Droplet Generator — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101c2b">
+  <meta name="description" content="In-browser microfluidic droplet volume, flow and ideal Poisson cell-encapsulation calculator.">
+  <title>Microfluidic Droplet Calculator</title>
+  <style>
+    :root { color-scheme: dark; --bg:#101c2b; --panel:#192b3c; --border:#385168; --text:#f1f6f9; --sub:#c1d1dc; --cyan:#69ded6; --danger:#ffb2aa; }
+    * { box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; margin:0; }
+    main { max-width:1150px; margin:auto; padding:clamp(16px,3vw,36px); }
+    .eyebrow { color:var(--cyan); font-size:.75rem; letter-spacing:.13em; text-transform:uppercase; font-weight:700; }
+    h1 { font-size:clamp(1.65rem,4vw,2.5rem); line-height:1.2; margin:.4rem 0; letter-spacing:-.025em; }
+    h2 { font-size:1.18rem; margin:0 0 1rem; }
+    h3 { font-size:1rem; margin:0; }
+    p { margin:.5rem 0 1rem; color:var(--sub); }
+    header { margin:0 0 1.6rem; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; align-items:start; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:1.25rem; }
+    .card.wide { grid-column:1/-1; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.85rem; }
+    label { display:block; font-size:.85rem; color:var(--sub); font-weight:600; margin-bottom:.2rem; }
+    input:not([type=checkbox]) { width:100%; min-width:0; border:1px solid #60768a; border-radius:7px; background:#101c2b; color:var(--text); padding:.65rem; font:inherit; }
+    input:focus-visible, button:focus-visible { outline:3px solid var(--cyan); outline-offset:2px; }
+    input[type=checkbox] { width:1.1rem; height:1.1rem; accent-color:var(--cyan); }
+    .check { display:flex; gap:.6rem; align-items:center; margin:1rem 0; }
+    .check label { margin:0; }
+    button { border-radius:7px; padding:.7rem 1rem; border:1px solid var(--cyan); color:#08282c; background:var(--cyan); cursor:pointer; font-weight:700; font:inherit; }
+    button:disabled { opacity:.4; cursor:not-allowed; }
+    button.secondary { color:var(--text); background:transparent; border-color:#73899d; }
+    .actions { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.1rem; }
+    .results { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; }
+    .result { border:1px solid var(--border); border-radius:10px; padding:.8rem; background:#132435; }
+    .result span { display:block; font-size:.78rem; color:var(--sub); }
+    .result strong { font-size:1.17rem; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+    .result.primary { border-color:#50a8aa; }
+    #error { color:var(--danger); font-weight:600; min-height:1.4em; }
+    .note { border-left:3px solid var(--cyan); padding-left:1rem; margin-top:1.2rem; }
+    .note p { margin:.25rem 0; }
+    .rule-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; }
+    pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#0c1926; color:var(--text); border-radius:9px; border:1px solid var(--border); padding:1rem; min-height:5rem; margin:1rem 0 0; font: .9rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    footer { padding-top:1.5rem; font-size:.82rem; color:var(--sub); }
+    a { color:var(--cyan); }
+    @media (max-width:740px) { .layout { grid-template-columns:1fr; } .rule-grid { grid-template-columns:1fr; } }
+    @media (max-width:440px) { .form-grid,.results { grid-template-columns:1fr; } }
+  </style>
+  <script src="./calculator.js" defer></script>
+  <script src="./app.js" defer></script>
 </head>
 <body>
+<main>
+  <header>
+    <div class="eyebrow">Droplet microfluidics • Reference calculations</div>
+    <h1>Droplet calculator</h1>
+    <p>Estimate dimensionless flow numbers, ideal spherical droplet volume, production frequency and random single-cell occupancy. All computations run locally in the browser.</p>
+  </header>
+  <div class="layout">
+    <section class="card" aria-labelledby="input-title">
+      <h2 id="input-title">Experimental inputs</h2>
+      <form id="calculator">
+        <div class="form-grid">
+          <div><label for="diameterUm">Droplet diameter (µm)</label><input id="diameterUm" name="diameterUm" type="number" step="any" min="0.000001" value="80" required></div>
+          <div><label for="dispersedFlowUlMin">Dispersed flow (µL/min)</label><input id="dispersedFlowUlMin" name="dispersedFlowUlMin" type="number" step="any" min="0" value="5" required></div>
+          <div><label for="viscosityMpaS">Dynamic viscosity (mPa·s)</label><input id="viscosityMpaS" name="viscosityMpaS" type="number" step="any" min="0.000001" value="2" required></div>
+          <div><label for="velocityMmS">Mean fluid velocity (mm/s)</label><input id="velocityMmS" name="velocityMmS" type="number" step="any" min="0.000001" value="20" required></div>
+          <div><label for="surfaceTensionMnM">Interfacial tension (mN/m)</label><input id="surfaceTensionMnM" name="surfaceTensionMnM" type="number" step="any" min="0.000001" value="20" required></div>
+          <div><label for="densityKgM3">Fluid density (kg/m³)</label><input id="densityKgM3" name="densityKgM3" type="number" step="any" min="0.000001" value="1000" required></div>
+          <div><label for="hydraulicDiameterUm">Hydraulic diameter (µm)</label><input id="hydraulicDiameterUm" name="hydraulicDiameterUm" type="number" step="any" min="0.000001" value="100" required></div>
+          <div><label for="cellConcentrationPerMl">Cell concentration (cells/mL)</label><input id="cellConcentrationPerMl" name="cellConcentrationPerMl" type="number" step="any" min="0" value="100000" required></div>
+        </div>
+        <div class="actions">
+          <button type="submit">Calculate</button>
+          <button type="button" class="secondary" id="export" disabled>Export CSV</button>
+        </div>
+      </form>
+      <p id="error" role="alert" aria-live="polite"></p>
+    </section>
 
-    <div class="header">
-        <div class="header-title">
-            <h1>Microfluidic Droplet Generator</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
+    <section class="card" id="report" aria-labelledby="output-title" hidden>
+      <h2 id="output-title">Calculated results</h2>
+      <div class="results" aria-live="polite">
+        <div class="result primary"><span>Droplet volume</span><strong id="volume"></strong></div>
+        <div class="result primary"><span>Frequency (approx.)</span><strong id="frequency"></strong></div>
+        <div class="result"><span>Capillary number, Ca</span><strong id="capillary"></strong></div>
+        <div class="result"><span>Reynolds number, Re</span><strong id="reynolds"></strong></div>
+        <div class="result"><span>Poisson mean, λ</span><strong id="lambda"></strong></div>
+        <div class="result"><span>Empty droplets, P(0)</span><strong id="pzero"></strong></div>
+        <div class="result primary"><span>Exactly one cell, P(1)</span><strong id="pone"></strong></div>
+        <div class="result"><span>Multiple cells, P(≥2)</span><strong id="pmultiple"></strong></div>
+        <div class="result"><span>Single-cell share of occupied</span><strong id="occupied"></strong></div>
+      </div>
+      <div class="note">
+        <h3>Model assumptions</h3>
+        <p>Spherical, monodisperse droplets; ideal random, independent Poisson loading; constant fluid properties. Predicted frequency uses the dispersed-phase volumetric flow only and assumes no loss.</p>
+        <p>These are estimates, not a droplet-size predictor, validated device simulator, clinical decision tool or GMP validation.</p>
+      </div>
+    </section>
 
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
+    <section class="card wide" aria-labelledby="audit-title">
+      <h2 id="audit-title">Legacy telemetry threshold checker</h2>
+      <p>Preserves the project's existing numerical screening rules (primary &gt;25; secondary &gt;12; critical flag; anomaly keywords). Thresholds are demonstration values, not established microfluidic operating limits.</p>
+      <form id="rules">
+        <div class="rule-grid">
+          <div><label for="primary_metric">Primary metric</label><input id="primary_metric" name="primary_metric" type="number" min="0" step="any" value="28.5" required></div>
+          <div><label for="secondary_metric">Secondary metric</label><input id="secondary_metric" name="secondary_metric" type="number" min="0" step="any" value="14.2" required></div>
+          <div><label for="status_descriptor">Status descriptor</label><input id="status_descriptor" name="status_descriptor" type="text" value="DISCORDANT" maxlength="120"></div>
         </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Microfluidic Droplet Generator Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "microfluidic-droplet-generator",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+        <div class="check"><input type="checkbox" id="is_critical_flag" name="is_critical_flag" checked><label for="is_critical_flag">Critical flag</label></div>
+        <button type="submit">Evaluate local rules</button>
+      </form>
+      <pre id="rule-output" role="status" aria-live="polite">Select “Evaluate local rules” to view a deterministic, unsigned result.</pre>
+    </section>
+  </div>
+  <footer>Privacy: input data stays in this browser tab. No tracking, external scripts or network API calls. CSV export is generated locally. The Python CLI and FastAPI audit service remain available in the repository for server-side workflows.</footer>
+  <noscript><p>This browser calculator requires JavaScript.</p></noscript>
+</main>
 </body>
 </html>

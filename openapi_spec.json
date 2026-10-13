@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Microfluidic Droplet Generator API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
+    "description": "Demonstration rule-based telemetry evaluation. The rule thresholds are not certified operating standards.",
     "version": "3.0.0-ENTERPRISE",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
@@ -15,7 +15,7 @@
         "summary": "Health and metadata check",
         "responses": {
           "200": {
-            "description": "System optimal"
+            "description": "Service health and metadata"
           }
         }
       }
@@ -25,7 +25,7 @@
         "summary": "Prometheus operational metrics",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "Prometheus text exposition"
           }
         }
       }
@@ -70,13 +70,16 @@
         "responses": {
           "200": {
             "description": "Consensus dossier with HMAC signature"
+          },
+          "422": {
+            "description": "Invalid numeric input or sensitive identifier rejected"
           }
         }
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Return deterministic mock response (no model inference)",
         "requestBody": {
           "content": {
             "application/json": {

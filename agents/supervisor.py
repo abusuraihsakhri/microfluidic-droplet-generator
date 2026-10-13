@@ -1,6 +1,6 @@
 """
 Supervisor Orchestrator & Operations Intelligence for Microfluidic Droplet Generator.
-Domain: Clinical & Biomedical AI
+Domain: Rule-based telemetry demonstration
 """
 import uuid
 from typing import Dict, Any, List, Optional
@@ -75,5 +75,5 @@ class SystemSupervisor:
 
     def query_supervisory_chat(self, query: str) -> str:
         PHIGuard.assert_no_phi(query)
-        prompt = f"Supervisor inquiry for Microfluidic Droplet Generator under CAP / CLSI / ISO Standards: {query}"
+        prompt = f"Supervisor inquiry for Microfluidic Droplet Generator using local demonstration rules: {query}"
         return self.llm.invoke(prompt)
