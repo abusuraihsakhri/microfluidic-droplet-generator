@@ -37,7 +37,7 @@
         const result = {
             dropletVolumeUl, capillaryNumber, reynoldsNumber, lambda,
             pZero, pOne, pMultiple, dropletFrequencyHz,
-            singleCellAmongOccupied: pZero === 1 ? 0 : pOne / (1 - pZero),
+            singleCellAmongOccupied: lambda === 0 ? 0 : pOne / -Math.expm1(-lambda),
         };
         if (!Object.values(result).every(Number.isFinite)) {
             throw new RangeError("Result exceeds numeric range; reduce extreme input values.");
