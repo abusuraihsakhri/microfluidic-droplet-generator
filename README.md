@@ -1,152 +1,81 @@
 # Microfluidic Droplet Generator
 
-> **Domain:** Clinical Decision Support & Biomedical Computing
-> **Reference Standards:** CAP / CLSI / ISO Standards
+A browser-based calculator for idealized droplet microfluidics, alongside the repository's existing Python rule-based telemetry evaluators, CLI, and FastAPI service.
 
-<div align="center">
+## Browser calculator
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+Open `web/index.html` in a modern browser, or serve the directory with `python -m http.server 8001 --directory web` and visit `http://localhost:8001`. No Python runtime, remote API or package installation is needed for the browser calculator.
 
-</div>
+The browser UI calculates:
 
----
+- **Droplet volume:** `V = (π/6) d³`, assuming a sphere (the UI converts µm³ to µL).
+- **Capillary number:** `Ca = μU/γ`, using viscosity, mean velocity and interfacial tension.
+- **Reynolds number:** `Re = ρUDh/μ`, using density, velocity and hydraulic diameter.
+- **Droplet frequency estimate:** dispersed-phase volumetric flow divided by droplet volume.
+- **Random cell occupancy:** `λ = cell_concentration × droplet_volume`; `P(0) = e^-λ`, `P(1) = λ e^-λ`, `P(≥2) = 1 - P(0) - P(1)`.
 
-## Overview
+Use the **Calculate** button to update results, or **Export CSV** to save the inputs and outputs. A separate *Legacy telemetry threshold checker* retains the repository's demonstration rules; its output is local and **not** a cryptographically signed audit record.
 
-Microfluidic Droplet Generator is a multi-agent evaluation platform that processes task payloads through specialized worker agents to produce consensus dossiers with cryptographic audit trails. It provides:
+The volume/frequency/Poisson calculations rely on spherical monodisperse droplets, ideal random loading, constant properties and no dispersed-phase losses. They do not predict droplet size from chip geometry, prove stable breakup regimes, control hardware, establish assay validity or demonstrate GMP compliance.
 
-- **Multi-Worker Evaluation**: Three specialized workers (InvariantQC, SafetyEscalation, ProtocolConformance) evaluate each task
-- **Zero-PHI Guard**: Prevents protected health information from leaving the system
-- **HMAC-SHA256 Audit Trail**: Tamper-evident cryptographic logging of all operations
-- **FastAPI REST API**: HTTP endpoints for integration with external systems
-- **Batch Processing**: CSV-based batch evaluation with error handling
+### Privacy and browser compatibility
 
----
+The browser app is static HTML, CSS and JavaScript; calculations and CSV export occur locally. It sends no input data to a server and loads no remote assets. It is intended for modern evergreen desktop and mobile browsers with JavaScript enabled.
 
-## Installation
+## Python evaluators
+
+The existing modules provide **illustrative, rule-based telemetry screening**, not a calibrated microfluidic physics engine or clinical diagnostic system. In particular, the primary/secondary thresholds in `agents/` and `droplet_microfluidics/` are example thresholds, **not established CAP, CLSI, ISO, Drop-seq or GMP acceptance criteria**. The `enrichment.py` suite likewise contains generic rule-based checks rather than experimentally validated controllers or optimization models.
+
+Requirements: Python 3.9+ (CI covers 3.10–3.12). Install from the repository root:
 
 ```bash
-# Clone the repository
-git clone https://github.com/abusuraihsakhri/microfluidic-droplet-generator.git
-cd microfluidic-droplet-generator
-
-# Install dependencies
-pip install fastapi uvicorn pydantic pytest
-
-# Set required environment variable
-export AUDIT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+python -m pip install -e ".[server,test]"
+export AUDIT_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
 ```
 
----
+The HMAC secret is required for the `agents/` implementation. Never commit the production key. The separate `droplet_microfluidics/` CLI does not use this HMAC audit service.
 
-## Usage
-
-### CLI Commands
-
-#### Single Task Evaluation
 ```bash
-python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
-```
-
-#### Batch Processing
-```bash
+# Example audit and batch run
+python cli.py audit --task-id TASK-001 --target SAMPLE-001 --primary 28.5 --secondary 14.2
 python cli.py batch -i sample.csv -o results.csv
-```
-
-#### Chat Query
-```bash
-python cli.py chat "What is the system status?"
-```
-
-#### Verify Audit Trail
-```bash
 python cli.py verify-audit
-```
 
-#### Start REST Server
-```bash
+# Alternative droplet_microfluidics rule evaluator
+python -m droplet_microfluidics.cli audit --task-id TASK-002
+
+# FastAPI and tests
 python cli.py serve --host 127.0.0.1 --port 8000
+python -m pytest -q
+node --test web/calculator.test.cjs
 ```
 
-### REST API Endpoints
+### API
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| GET | `/metrics` | Prometheus metrics |
-| POST | `/api/audit` | Submit task for evaluation |
-| POST | `/api/chat` | Query supervisory chat |
-| GET | `/api/audit/logs` | Retrieve audit trail |
+The default FastAPI service is `agents.api:app`:
 
-### Input Data Schema
+| Route | Purpose |
+| --- | --- |
+| `GET /health` | Service metadata |
+| `POST /api/audit` | Assess submitted numeric metrics using demonstration rules |
+| `POST /api/chat` | Deterministic mock response; no live language model |
+| `GET /metrics` | Prometheus text metrics |
+| `GET /api/audit/logs` | In-memory HMAC-signed audit entry metadata and integrity check |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `task_id` | string | Yes | Unique task identifier |
-| `target_identifier` | string | Yes | Target entity key |
-| `primary_metric` | float | Yes | Primary measurement value |
-| `secondary_metric` | float | No | Secondary metric (default: 0.0) |
-| `status_descriptor` | string | No | Status code (default: NOMINAL) |
-| `is_critical_flag` | bool | No | Emergency escalation flag |
+`AUDIT_SECRET_KEY` is required before importing the API. Audit entries are stored **in process memory**, not in durable storage; they disappear after a restart. HMAC verification detects changed signed fields or broken chain links, but does not verify external data provenance.
 
----
+### Docker
 
-## Testing
+Copy `.env.example` to `.env` and replace its sample key with a securely generated value before starting:
 
 ```bash
-# Run all tests
-pytest -v
-
-# Run with coverage
-pytest -v --cov=agents --cov=droplet_microfluidics
-```
-
----
-
-## Simulation
-
-Run high-throughput simulation benchmarks:
-
-```bash
-python simulator.py 1000
-```
-
----
-
-## Docker Deployment
-
-```bash
-# Copy environment template
-cp .env.example .env
-# Edit .env with your secure values
-
-# Build and run
 docker compose up --build
 ```
 
-Or manually:
+The compose file exposes port 8000. **Do not expose the API to an untrusted network without adding authentication, TLS, access controls and appropriate persistence.** The identifier filter is regex-based and incomplete; do not submit patient identifiers or other sensitive information. It is not a HIPAA de-identification guarantee.
 
-```bash
-docker build -t microfluidic-droplet-generator .
-docker run -p 8000:8000 --env-file .env microfluidic-droplet-generator
-```
+## Development and deployment
 
----
+The `master` branch runs Python test suites and dependency installation through GitHub Actions. The `web/` calculator uses native JavaScript (not Pyodide), so a static hosting target such as GitHub Pages is sufficient. `.github/workflows/pages.yml` publishes that directory after updates to `master`, subject to the repository's Pages configuration.
 
-## Security
-
-- **Zero-PHI Outbound Interceptor**: Active regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers
-- **HMAC-SHA256 Audit Trail**: Chained, cryptographically signed logs
-- **Path Traversal Protection**: All file paths validated against working directory
-- **Input Validation**: NaN/Infinity values rejected; finite number enforcement
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
+Project license: [MIT](LICENSE).
