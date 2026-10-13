@@ -24,13 +24,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install fastapi uvicorn pydantic pytest
+        pip install -e ".[server,test]"
+
+    - name: Generate ephemeral test HMAC key
+      run: echo "AUDIT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')" >> "$GITHUB_ENV"
 
     - name: Run Pytest Suite
       run: |
         pytest -v
 
-    - name: Security SAST & Zero-PHI Audit
+    - name: Check browser calculator tests
+      run: node --test web/calculator.test.cjs
+
+    - name: Audit signature verification smoke test
       run: |
         python -c "
         from agents.base import PHIGuard, AuditLogger
